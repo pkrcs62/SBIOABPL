@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ANC बैठक – प्रकरण सूचना पोर्टल</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;700&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--paper:#f4f6f9;--card:#fff;--ink:#14263b;--mut:#5b6b7e;--blue:#1d4f91;--blue2:#143a6c;--gold:#e39a1b;--line:#d3dae3;--ok:#1d7a4b;--bad:#b3261e;--r:10px}
+@media(prefers-color-scheme:dark){:root{--paper:#0e1824;--card:#16253a;--ink:#e8eef6;--mut:#9fb0c4;--blue:#6aa3ec;--blue2:#3f78c4;--line:#2b3f58;--gold:#f0b244}}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:'Mukta',system-ui,sans-serif;background:var(--paper);color:var(--ink);font-size:17px;line-height:1.55;padding-top:env(safe-area-inset-top,0)}
+header{background:var(--blue2);color:#fff;border-bottom:5px solid var(--gold)}
+.wrap{max-width:980px;margin:0 auto;padding:0 18px}
+header .wrap{padding-top:26px;padding-bottom:26px}
+h1{font-family:'Tiro Devanagari Hindi',serif;font-weight:400;font-size:clamp(26px,5vw,40px);line-height:1.25;margin:0 0 6px}
+header p{margin:0;opacity:.9;max-width:62ch}
+main{padding:24px 0 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px;margin-bottom:18px}
+.note{border-left:4px solid var(--gold);padding:4px 14px;color:var(--mut);margin:0 0 18px}
+.note b{color:var(--ink)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px}
+.full{grid-column:1/-1}
+@media(max-width:640px){.grid{grid-template-columns:1fr}}
+label.l{display:block;font-weight:700;margin-bottom:4px}
+label.l i{color:var(--bad);font-style:normal}
+input,select,textarea{width:100%;font:inherit;color:inherit;background:var(--paper);border:1.5px solid var(--line);border-radius:8px;padding:10px 12px}
+textarea{min-height:130px;resize:vertical}
+input:focus,select:focus,textarea:focus,button:focus-visible,.chip:focus-within{outline:3px solid var(--gold);outline-offset:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative;border:1.5px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer;background:var(--paper)}
+.chip input{position:absolute;opacity:0;width:0;height:0}
+.chip:has(input:checked){background:var(--blue2);color:#fff;border-color:var(--blue2)}
+.drop{border:2px dashed var(--line);border-radius:var(--r);padding:16px;text-align:center;color:var(--mut)}
+.files{list-style:none;margin:10px 0 0;padding:0}
+.files li{display:flex;justify-content:space-between;gap:10px;padding:6px 10px;border-radius:6px;background:var(--paper);margin-top:6px;font-size:15px}
+.files button{border:0;background:none;color:var(--bad);cursor:pointer;font:inherit}
+.btn{font:inherit;font-weight:700;border:0;border-radius:8px;padding:11px 22px;background:var(--blue2);color:#fff;cursor:pointer}
+.btn:hover{background:var(--blue)}.btn.alt{background:transparent;color:var(--blue);border:1.5px solid var(--blue)}
+.btn.sm{padding:6px 12px;font-size:15px}.btn.bad{background:var(--bad)}.btn:disabled{opacity:.5;cursor:wait}
+.msg{padding:12px 14px;border-radius:8px;margin-top:14px}
+.msg.ok{background:#e3f4ea;color:#12513a}.msg.err{background:#fde7e5;color:#7a1712}
+.big{font-family:'Tiro Devanagari Hindi',serif;font-size:30px;color:var(--blue);letter-spacing:.5px}
+footer{text-align:center;color:var(--mut);font-size:14px;padding:0 0 calc(24px + env(safe-area-inset-bottom,0))}
+footer a{color:var(--mut)}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:14px}
+.bar>div{flex:1 1 150px}
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.stat{flex:1 1 120px;border:1px solid var(--line);border-radius:var(--r);padding:10px 14px;background:var(--card)}
+.stat b{display:block;font-size:26px;color:var(--blue)}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--paper);white-space:nowrap}
+tr.row{cursor:pointer}tr.row:hover{background:var(--paper)}
+.tag{display:inline-block;padding:1px 10px;border-radius:999px;font-size:13px;border:1px solid var(--line)}
+.tag.s0{background:#fff3d6;color:#6b4a00}.tag.s1{background:#dcebff;color:#143a6c}.tag.s2{background:#e3f4ea;color:#12513a}
+dialog{border:1px solid var(--line);border-radius:var(--r);background:var(--card);color:var(--ink);max-width:640px;width:calc(100% - 24px);padding:22px}
+dialog::backdrop{background:rgba(10,20,35,.55)}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:4px 12px;margin:10px 0}.kv dt{color:var(--mut)}.kv dd{margin:0;white-space:pre-wrap}
+.hide{display:none!important}
+.setup{background:#fff3d6;color:#4a3300;border-radius:var(--r);padding:16px;margin-bottom:18px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>ANC बैठक – प्रकरण सूचना पोर्टल</h1>
+<p>ANC बैठक नवंबर माह के अंतिम सप्ताह में जबलपुर में प्रस्तावित है। अपना लंबित प्रकरण यहाँ दर्ज करें, ताकि उसे बैठक में उचित स्तर पर रखा जा सके।</p>
+</div></header>
+
+<main><div class="wrap">
+<div id="setup" class="setup hide"><b>सेटअप बाकी है:</b> इस फ़ाइल में सबसे ऊपर <code>CFG</code> में Supabase URL और anon key भरें, और <code>supabase_setup.sql</code> चलाएँ।</div>
+
+<!-- STAFF FORM -->
+<section id="pub">
+<p class="note">उदाहरण: <b>TA Bill, Medical Bill, Officiating / अतिरिक्त कार्यभार, Premises/Infrastructure, अनुचित व्यवहार, अवकाश, स्थानांतरण, स्टाफ की कमी</b> या कोई अन्य प्रकरण। संक्षिप्त विवरण, शाखा का नाम और उपलब्ध दस्तावेज़ संलग्न करें।</p>
+<form id="f" class="card" novalidate>
+<div class="grid">
+<div><label class="l" for="name">नाम <i>*</i></label><input id="name" autocomplete="name" required></div>
+<div><label class="l" for="emp">कर्मचारी क्रमांक / PF ID</label><input id="emp" inputmode="numeric"></div>
+<div><label class="l" for="desg">पदनाम</label><input id="desg"></div>
+<div><label class="l" for="branch">शाखा का नाम <i>*</i></label><input id="branch" required></div>
+<div class="full"><label class="l" for="mob">मोबाइल नंबर</label><input id="mob" type="tel" inputmode="tel" maxlength="10" placeholder="10 अंक"></div>
+<div class="full"><span class="l" style="font-weight:700;display:block;margin-bottom:6px">प्रकरण का प्रकार <i style="color:var(--bad);font-style:normal">*</i></span><div class="chips" id="cats"></div></div>
+<div class="full"><label class="l" for="det">प्रकरण का संक्षिप्त विवरण <i>*</i></label><textarea id="det" required placeholder="कब से लंबित है, किस स्तर पर अटका है, आपकी अपेक्षा क्या है"></textarea></div>
+<div class="full"><span class="l" style="font-weight:700;display:block;margin-bottom:6px">दस्तावेज़ संलग्न करें</span>
+<div class="drop"><input type="file" id="fi" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx"><div style="font-size:14px;margin-top:6px">अधिकतम 5 फ़ाइलें, प्रत्येक 5 MB तक (PDF, फोटो, Word, Excel)</div></div>
+<ul class="files" id="fl"></ul></div>
+<div class="full"><label class="chip" style="display:inline-block;border-radius:8px"><input type="checkbox" id="conf"> मेरा नाम केवल ANC प्रतिनिधि तक सीमित रखा जाए</label></div>
+</div>
+<div style="margin-top:18px"><button class="btn" id="sub" type="submit">प्रकरण जमा करें</button></div>
+<div id="out" role="status"></div>
+</form>
+</section>
+
+<!-- ADMIN -->
+<section id="adm" class="hide">
+<form id="lg" class="card" style="max-width:420px;margin:0 auto">
+<h2 style="margin-top:0;font-family:'Tiro Devanagari Hindi',serif;font-weight:400">एडमिन लॉगिन</h2>
+<label class="l" for="em">ईमेल</label><input id="em" type="email" autocomplete="username" required>
+<label class="l" for="pw" style="margin-top:12px">पासवर्ड</label><input id="pw" type="password" autocomplete="current-password" required>
+<div style="margin-top:16px"><button class="btn" type="submit">लॉगिन करें</button></div>
+<div id="lgm"></div>
+</form>
+
+<div id="dash" class="hide">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="margin:0;font-family:'Tiro Devanagari Hindi',serif;font-weight:400">प्राप्त प्रकरण</h2><button class="btn alt sm" id="lo">लॉगआउट</button></div>
+<div class="stats" id="stats"></div>
+<div class="bar card" style="padding:14px">
+<div><label class="l" for="fc">प्रकार</label><select id="fc"></select></div>
+<div><label class="l" for="fb">शाखा</label><select id="fb"></select></div>
+<div><label class="l" for="fs">स्थिति</label><select id="fs"></select></div>
+<div><label class="l" for="q">खोजें</label><input id="q" type="search" placeholder="नाम, शाखा, विवरण"></div>
+<div><label class="l" for="gb">ग्रुप के अनुसार रिपोर्ट</label><select id="gb"><option value="">सभी एक साथ</option><option value="category">प्रकार अनुसार</option><option value="branch">शाखा अनुसार</option><option value="status">स्थिति अनुसार</option></select></div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+<button class="btn sm" id="xp">PDF / प्रिंट</button><button class="btn sm" id="xx">Excel</button><button class="btn sm" id="xc">CSV</button><span id="cnt" style="align-self:center;color:var(--mut)"></span>
+</div>
+<div class="tw"><table><thead><tr><th>Ref</th><th>दिनांक</th><th>नाम</th><th>शाखा</th><th>प्रकार</th><th>स्थिति</th><th>फ़ाइल</th></tr></thead><tbody id="tb"></tbody></table></div>
+</div>
+</section>
+</div></main>
+
+<dialog id="dg"></dialog>
+<footer>ANC सूचना पोर्टल · <a href="#admin" id="al">एडमिन</a></footer>
+
+<script>
+/* ====== 1. यहाँ अपने Supabase की जानकारी भरें (Project Settings > API) ====== */
+const CFG={URL:"https://zlpytndlqjdydwthxmra.supabase.co",KEY:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpscHl0bmRscWpkeWR3dGh4bXJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MjE5OTAsImV4cCI6MjExMTA5Nzk5MH0.4Z_ZbDjQUKnonM7dBwJX-fwGntcGSpf2uDOyUqWDqIM",BUCKET:"anc-files"};
+/* ======================================================================== */
+const CATS=["TA Bill","Medical Bill","Officiating / अतिरिक्त कार्यभार","Premises एवं Branch Infrastructure","अनुचित व्यवहार (Misbehaviour)","अवकाश / स्थानांतरण / स्टाफ की कमी","अन्य"];
+const STAT=["लंबित","प्रक्रियाधीन","निस्तारित"];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const sb=(CFG.URL&&CFG.KEY)?supabase.createClient(CFG.URL,CFG.KEY):null;
+if(!sb)$("setup").classList.remove("hide");
+const fmt=d=>new Date(d).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});
+const msg=(el,t,k)=>el.innerHTML=`<div class="msg ${k}">${t}</div>`;
+
+/* ---------- routing ---------- */
+function route(){const a=location.hash==="#admin";$("pub").classList.toggle("hide",a);$("adm").classList.toggle("hide",!a);if(a)initAdmin()}
+addEventListener("hashchange",route);
+
+/* ---------- staff form ---------- */
+$("cats").innerHTML=CATS.map((c,i)=>`<label class="chip"><input type="radio" name="cat" value="${esc(c)}"${i==0?" required":""}>${esc(c)}</label>`).join("");
+let files=[];
+function drawFiles(){$("fl").innerHTML=files.map((f,i)=>`<li><span>${esc(f.name)} (${(f.size/1048576).toFixed(1)} MB)</span><button type="button" data-i="${i}" aria-label="हटाएँ">हटाएँ</button></li>`).join("")}
+$("fi").onchange=e=>{for(const f of e.target.files){if(f.size>5242880){alert(f.name+" 5 MB से बड़ी है");continue}if(files.length>=5){alert("अधिकतम 5 फ़ाइलें");break}files.push(f)}e.target.value="";drawFiles()};
+$("fl").onclick=e=>{const i=e.target.dataset.i;if(i!=null){files.splice(i,1);drawFiles()}};
+const safe=n=>n.replace(/[^\w.\-]/g,"_");
+$("f").onsubmit=async e=>{
+ e.preventDefault();const out=$("out");
+ if(!sb)return msg(out,"पोर्टल अभी कनेक्ट नहीं है। एडमिन से संपर्क करें।","err");
+ const cat=document.querySelector("input[name=cat]:checked");
+ if(!$("name").value.trim()||!$("branch").value.trim()||!$("det").value.trim()||!cat)return msg(out,"नाम, शाखा, प्रकरण का प्रकार और विवरण भरना आवश्यक है।","err");
+ const mob=$("mob").value.trim();if(mob&&!/^\d{10}$/.test(mob))return msg(out,"मोबाइल नंबर 10 अंकों का होना चाहिए।","err");
+ $("sub").disabled=true;out.innerHTML="";
+ const ref="ANC-"+Date.now().toString(36).toUpperCase().slice(-6)+Math.random().toString(36).slice(2,4).toUpperCase();
+ try{
+  const up=[];
+  for(const f of files){const p=`${ref}/${Date.now()}_${safe(f.name)}`;const {error}=await sb.storage.from(CFG.BUCKET).upload(p,f,{contentType:f.type||"application/octet-stream"});if(error)throw error;up.push({name:f.name,path:p,size:f.size})}
+  const {error}=await sb.from("anc_cases").insert({ref,name:$("name").value.trim(),emp_id:$("emp").value.trim(),designation:$("desg").value.trim(),branch:$("branch").value.trim(),mobile:mob,category:cat.value,details:$("det").value.trim(),confidential:$("conf").checked,files:up});
+  if(error)throw error;
+  $("f").reset();files=[];drawFiles();
+  out.innerHTML=`<div class="msg ok">आपका प्रकरण दर्ज हो गया। संदर्भ संख्या सुरक्षित रखें:<div class="big">${ref}</div></div>`;
+  out.scrollIntoView({behavior:"smooth",block:"center"});
+ }catch(err){msg(out,"जमा नहीं हो सका: "+esc(err.message||err)+"। कृपया पुनः प्रयास करें।","err")}
+ $("sub").disabled=false;
+};
+
+/* ---------- admin ---------- */
+let ALL=[],VIEW=[];
+async function initAdmin(){
+ if(!sb)return msg($("lgm"),"पहले Supabase सेटअप करें।","err");
+ const {data}=await sb.auth.getSession();
+ data.session?showDash():($("lg").classList.remove("hide"),$("dash").classList.add("hide"));
+}
+$("lg").onsubmit=async e=>{e.preventDefault();const {error}=await sb.auth.signInWithPassword({email:$("em").value,password:$("pw").value});error?msg($("lgm"),"लॉगिन विफल: ईमेल/पासवर्ड जाँचें।","err"):showDash()};
+$("lo").onclick=async()=>{await sb.auth.signOut();initAdmin()};
+async function showDash(){
+ $("lg").classList.add("hide");$("dash").classList.remove("hide");
+ const {data,error}=await sb.from("anc_cases").select("*").order("created_at",{ascending:false});
+ if(error)return alert(error.message);ALL=data;
+ const opt=(a,all)=>`<option value="">${all}</option>`+a.map(x=>`<option>${esc(x)}</option>`).join("");
+ $("fc").innerHTML=opt(CATS,"सभी");$("fs").innerHTML=opt(STAT,"सभी");
+ $("fb").innerHTML=opt([...new Set(ALL.map(r=>r.branch))].sort(),"सभी");
+ render();
+}
+["fc","fb","fs","q"].forEach(i=>$(i).oninput=render);
+function render(){
+ const q=$("q").value.toLowerCase();
+ VIEW=ALL.filter(r=>(!$("fc").value||r.category===$("fc").value)&&(!$("fb").value||r.branch===$("fb").value)&&(!$("fs").value||r.status===$("fs").value)&&(!q||[r.name,r.branch,r.details,r.ref,r.emp_id].join(" ").toLowerCase().includes(q)));
+ $("stats").innerHTML=`<div class="stat"><b>${ALL.length}</b>कुल प्रकरण</div>`+STAT.map(s=>`<div class="stat"><b>${ALL.filter(r=>r.status===s).length}</b>${s}</div>`).join("");
+ $("cnt").textContent=VIEW.length+" प्रकरण दिख रहे हैं";
+ $("tb").innerHTML=VIEW.length?VIEW.map(r=>`<tr class="row" data-id="${r.id}"><td>${esc(r.ref)}</td><td>${fmt(r.created_at)}</td><td>${esc(r.name)}${r.confidential?" 🔒":""}</td><td>${esc(r.branch)}</td><td>${esc(r.category)}</td><td><span class="tag s${Math.max(0,STAT.indexOf(r.status))}">${esc(r.status)}</span></td><td>${(r.files||[]).length||"–"}</td></tr>`).join(""):`<tr><td colspan="7" style="text-align:center;color:var(--mut)">कोई प्रकरण नहीं मिला। फ़िल्टर बदलकर देखें।</td></tr>`;
+}
+$("tb").onclick=e=>{const tr=e.target.closest("tr.row");if(tr)openCase(ALL.find(r=>r.id===tr.dataset.id))};
+
+function openCase(r){
+ const d=$("dg");
+ d.innerHTML=`<h3 style="margin:0;font-family:'Tiro Devanagari Hindi',serif;font-weight:400">${esc(r.ref)} <span style="color:var(--mut);font-size:15px">${fmt(r.created_at)}</span></h3>
+ <dl class="kv"><dt>नाम</dt><dd>${esc(r.name)}${r.confidential?" (नाम गोपनीय रखने का अनुरोध)":""}</dd><dt>PF ID</dt><dd>${esc(r.emp_id)||"–"}</dd><dt>पदनाम</dt><dd>${esc(r.designation)||"–"}</dd><dt>शाखा</dt><dd>${esc(r.branch)}</dd><dt>मोबाइल</dt><dd>${esc(r.mobile)||"–"}</dd><dt>प्रकार</dt><dd>${esc(r.category)}</dd><dt>विवरण</dt><dd>${esc(r.details)}</dd><dt>फ़ाइलें</dt><dd id="dfl">${(r.files||[]).map((f,i)=>`<a href="#" data-p="${esc(f.path)}">${esc(f.name)}</a>`).join("<br>")||"–"}</dd></dl>
+ <label class="l" for="ds">स्थिति</label><select id="ds">${STAT.map(s=>`<option${s===r.status?" selected":""}>${s}</option>`).join("")}</select>
+ <label class="l" for="dr" style="margin-top:10px">ANC टिप्पणी / कार्यवाही</label><textarea id="dr" style="min-height:80px">${esc(r.remarks)}</textarea>
+ <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px"><button class="btn sm" id="dsv">सहेजें</button><button class="btn alt sm" id="dpr">इस प्रकरण का PDF / प्रिंट</button><button class="btn bad sm" id="dde">हटाएँ</button><button class="btn alt sm" id="dcl" style="margin-left:auto">बंद करें</button></div><div id="dm"></div>`;
+ d.showModal();
+ $("dcl").onclick=()=>d.close();
+ $("dfl").onclick=async e=>{const p=e.target.dataset?.p;if(!p)return;e.preventDefault();const {data,error}=await sb.storage.from(CFG.BUCKET).createSignedUrl(p,600);error?alert(error.message):window.open(data.signedUrl,"_blank")};
+ $("dsv").onclick=async()=>{const {error}=await sb.from("anc_cases").update({status:$("ds").value,remarks:$("dr").value}).eq("id",r.id);if(error)return msg($("dm"),esc(error.message),"err");r.status=$("ds").value;r.remarks=$("dr").value;render();msg($("dm"),"सहेजा गया","ok")};
+ $("dpr").onclick=()=>printReport([r],"");
+ $("dde").onclick=async()=>{if(!confirm(r.ref+" स्थायी रूप से हटाएँ?"))return;const ps=(r.files||[]).map(f=>f.path);if(ps.length)await sb.storage.from(CFG.BUCKET).remove(ps);const {error}=await sb.from("anc_cases").delete().eq("id",r.id);if(error)return alert(error.message);ALL=ALL.filter(x=>x.id!==r.id);d.close();render()};
+}
+
+/* ---------- exports ---------- */
+const COLS=[["ref","Ref"],["created_at","दिनांक"],["name","नाम"],["emp_id","PF ID"],["designation","पदनाम"],["branch","शाखा"],["mobile","मोबाइल"],["category","प्रकार"],["details","विवरण"],["status","स्थिति"],["remarks","टिप्पणी"],["files","संलग्न फ़ाइलें"]];
+const cell=(r,k)=>k==="created_at"?fmt(r[k]):k==="files"?(r.files||[]).map(f=>f.name).join(", "):(r[k]??"");
+const sheetRows=rs=>rs.map(r=>Object.fromEntries(COLS.map(([k,h])=>[h,cell(r,k)])));
+const stamp=()=>new Date().toISOString().slice(0,10);
+const groups=(rs,g)=>{if(!g)return{"सभी प्रकरण":rs};const m={};rs.forEach(r=>(m[r[g]]=m[r[g]]||[]).push(r));return m};
+$("xc").onclick=()=>{
+ const rows=sheetRows(VIEW),h=COLS.map(c=>c[1]);
+ const csv=[h,...rows.map(o=>h.map(k=>o[k]))].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\r\n");
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}));a.download=`ANC_${stamp()}.csv`;a.click();
+};
+$("xx").onclick=()=>{
+ const wb=XLSX.utils.book_new(),g=$("gb").value;
+ XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(sheetRows(VIEW)),"सभी");
+ if(g)Object.entries(groups(VIEW,g)).forEach(([k,rs])=>XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(sheetRows(rs)),k.replace(/[\\\/?*\[\]:]/g," ").slice(0,28)||"Sheet"));
+ XLSX.writeFile(wb,`ANC_${stamp()}.xlsx`);
+};
+$("xp").onclick=()=>printReport(VIEW,$("gb").value);
+function printReport(rs,g){
+ const gs=groups(rs,g),single=rs.length===1;
+ const body=Object.entries(gs).map(([k,list])=>`<h2>${esc(k)} <small>(${list.length})</small></h2>`+(single?
+  `<table>${COLS.map(([c,h])=>`<tr><th style="width:28%">${h}</th><td>${esc(cell(list[0],c))}</td></tr>`).join("")}</table>`:
+  `<table><tr><th>Ref</th><th>दिनांक</th><th>नाम / शाखा</th><th>प्रकार</th><th>विवरण</th><th>स्थिति</th></tr>${list.map(r=>`<tr><td>${esc(r.ref)}</td><td>${fmt(r.created_at)}</td><td>${esc(r.name)}<br><small>${esc(r.designation)} ${esc(r.branch)}</small></td><td>${esc(r.category)}</td><td>${esc(r.details)}</td><td>${esc(r.status)}</td></tr>`).join("")}</table>`)).join("");
+ const w=window.open("","_blank");if(!w)return alert("पॉप-अप की अनुमति दें");
+ w.document.write(`<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><title>ANC रिपोर्ट</title><link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;700&display=swap" rel="stylesheet"><style>body{font-family:Mukta,sans-serif;font-size:12px;margin:18px;color:#000}h1{font-size:20px;margin:0}h2{font-size:15px;margin:20px 0 6px;border-bottom:2px solid #143a6c}small{font-weight:400;color:#444}table{border-collapse:collapse;width:100%;page-break-inside:auto}tr{page-break-inside:avoid}th,td{border:1px solid #888;padding:5px 7px;text-align:left;vertical-align:top;white-space:pre-wrap}th{background:#e9eef5}</style></head><body><h1>ANC बैठक – प्रकरण रिपोर्ट</h1><div>दिनांक: ${fmt(new Date())} · कुल प्रकरण: ${rs.length}</div>${body}<script>document.fonts.ready.then(()=>setTimeout(()=>print(),300))<\/script></body></html>`);
+ w.document.close();
+}
+route();
+</script>
+</body>
+</html>
